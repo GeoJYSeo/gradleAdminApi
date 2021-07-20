@@ -34,15 +34,15 @@ public class LoginApiController {
 	private JwtUtil jwtUtil;
 
 	@PostMapping("/access-token")
-	public ResponseEntity<LoginApiResponse> login(@RequestBody @Valid LoginApiRequest request) throws URISyntaxException, Exception {
+	public ResponseEntity<LoginApiResponse> login(@RequestBody @Valid LoginApiRequest request) throws Exception {
 		log.info("post user login");
-		
+
 		String userEmail = request.getUserEmail();
 		String passwd = request.getPasswd();
 		User user = loginApiLogicService.authenticate(userEmail, passwd);
-		
+
 		String accessToken = jwtUtil.createToken(user.getId(), userEmail, user.getAccess().getId());
-		
+
 		String url = "access-token";
 		return ResponseEntity.created(new URI(url)).body(LoginApiResponse.builder().accessToken(accessToken).build());
 	}

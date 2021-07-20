@@ -1,0 +1,35 @@
+INFO  21-07-18 12:11:09[background-preinit] [Version:21] - HV000001: Hibernate Validator 6.1.7.Final
+INFO  21-07-18 12:11:09[restartedMain] [GradleAdminApiApplication:55] - Starting GradleAdminApiApplication using Java 11.0.11 on 65f79bb0eb55 with PID 165 (/api/gradleAdminApi/build/classes/java/main started by root in /api/gradleAdminApi)
+INFO  21-07-18 12:11:09[restartedMain] [GradleAdminApiApplication:668] - The following profiles are active: docker
+INFO  21-07-18 12:11:09[restartedMain] [DevToolsPropertyDefaultsPostProcessor:255] - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+INFO  21-07-18 12:11:09[restartedMain] [DevToolsPropertyDefaultsPostProcessor:255] - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+INFO  21-07-18 12:11:22[restartedMain] [RepositoryConfigurationDelegate:128] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+INFO  21-07-18 12:11:26[restartedMain] [RepositoryConfigurationDelegate:188] - Finished Spring Data repository scanning in 4330 ms. Found 8 JPA repository interfaces.
+WARN  21-07-18 12:11:30[restartedMain] [ClassPathMapperScanner:44] - No MyBatis mapper was found in '[com.example.gradleAdminApi]' package. Please check your configuration.
+INFO  21-07-18 12:11:33[restartedMain] [TomcatWebServer:108] - Tomcat initialized with port(s): 8080 (http)
+INFO  21-07-18 12:11:33[restartedMain] [Http11NioProtocol:173] - Initializing ProtocolHandler ["http-nio-8080"]
+INFO  21-07-18 12:11:33[restartedMain] [StandardService:173] - Starting service [Tomcat]
+INFO  21-07-18 12:11:33[restartedMain] [StandardEngine:173] - Starting Servlet engine: [Apache Tomcat/9.0.48]
+INFO  21-07-18 12:11:34[restartedMain] [[/]:173] - Initializing Spring embedded WebApplicationContext
+INFO  21-07-18 12:11:34[restartedMain] [ServletWebServerApplicationContext:289] - Root WebApplicationContext: initialization completed in 24104 ms
+INFO  21-07-18 12:11:35[restartedMain] [HikariDataSource:110] - HikariPool-1 - Starting...
+INFO  21-07-18 12:11:36[restartedMain] [HikariDataSource:123] - HikariPool-1 - Start completed.
+INFO  21-07-18 12:11:38[restartedMain] [LogHelper:31] - HHH000204: Processing PersistenceUnitInfo [name: default]
+INFO  21-07-18 12:11:39[restartedMain] [Version:44] - HHH000412: Hibernate ORM core version 5.4.32.Final
+INFO  21-07-18 12:11:40[restartedMain] [Version:56] - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+INFO  21-07-18 12:11:42[restartedMain] [Dialect:175] - HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+INFO  21-07-18 12:11:49[restartedMain] [JtaPlatformInitiator:52] - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+INFO  21-07-18 12:11:49[restartedMain] [LocalContainerEntityManagerFactoryBean:437] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+WARN  21-07-18 12:11:53[restartedMain] [JpaBaseConfiguration$JpaWebConfiguration:221] - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+INFO  21-07-18 12:11:54[restartedMain] [UserDetailsServiceAutoConfiguration:86] - 
+
+Using generated security password: 2c7df542-9059-4aa1-9744-3a754d7ade42
+
+INFO  21-07-18 12:11:56[restartedMain] [DefaultSecurityFilterChain:51] - Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4164de8d, org.springframework.security.web.context.SecurityContextPersistenceFilter@3982c5f9, org.springframework.security.web.header.HeaderWriterFilter@79147474, org.springframework.web.filter.CorsFilter@1227ea4, org.springframework.security.web.authentication.logout.LogoutFilter@7a80bf6c, com.example.gradleAdminApi.filters.JwtAuthenticationFilter@63ac1130, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@f9366ed, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2ccc28e0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1011a389, org.springframework.security.web.session.SessionManagementFilter@6499fd34, org.springframework.security.web.access.ExceptionTranslationFilter@66f36f5e]
+INFO  21-07-18 12:11:57[restartedMain] [DefaultCredentialsProvider:118] - Default credentials provider for service account test-react-bnb@test-react-bnb.iam.gserviceaccount.com
+INFO  21-07-18 12:11:57[restartedMain] [DefaultCredentialsProvider:124] - Scopes in use by default credentials: [https://www.googleapis.com/auth/pubsub, https://www.googleapis.com/auth/spanner.admin, https://www.googleapis.com/auth/spanner.data, https://www.googleapis.com/auth/datastore, https://www.googleapis.com/auth/sqlservice.admin, https://www.googleapis.com/auth/devstorage.read_only, https://www.googleapis.com/auth/devstorage.read_write, https://www.googleapis.com/auth/cloudruntimeconfig, https://www.googleapis.com/auth/trace.append, https://www.googleapis.com/auth/cloud-platform, https://www.googleapis.com/auth/cloud-vision, https://www.googleapis.com/auth/bigquery, https://www.googleapis.com/auth/monitoring.write]
+INFO  21-07-18 12:11:58[restartedMain] [GcpContextAutoConfiguration:80] - The default project ID is null
+INFO  21-07-18 12:12:04[restartedMain] [OptionalLiveReloadServer:58] - LiveReload server is running on port 35729
+INFO  21-07-18 12:12:04[restartedMain] [Http11NioProtocol:173] - Starting ProtocolHandler ["http-nio-8080"]
+INFO  21-07-18 12:12:04[restartedMain] [TomcatWebServer:220] - Tomcat started on port(s): 8080 (http) with context path ''
+INFO  21-07-18 12:12:04[restartedMain] [GradleAdminApiApplication:61] - Started GradleAdminApiApplication in 58.842 seconds (JVM running for 60.994)
