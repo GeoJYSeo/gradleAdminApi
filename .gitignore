@@ -38,6 +38,7 @@ out/
 
 ### logs ###
 logs/
+log**
 
 ### json ###
 src/main/resources/**.json
