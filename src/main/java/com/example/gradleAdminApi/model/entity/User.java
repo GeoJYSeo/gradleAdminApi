@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.*;
 
 import com.example.gradleAdminApi.model.enumclass.UserAccess;
+import com.example.gradleAdminApi.model.enumclass.UserStatus;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,7 +23,7 @@ import lombok.experimental.Accessors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"orderList", "replyList", "cartList"})
+@ToString(exclude = {"orderList", "replyList", "cartList", "goodsKeyList"})
 @Entity
 @DynamicInsert
 @DynamicUpdate
@@ -40,6 +41,7 @@ public class User {
 //	`user_addr2` VARCHAR(50) NULL,
 //	`user_addr3` VARCHAR(50) NULL,
 //	`phone_num` VARCHAR(20) NULL,
+//	`status` VARCHAR(20) NOT NULL,
 //	`access` TINYINT NOT NULL DEFAULT 0,
 //	`last_login_at` DATETIME NULL,
 //	`reg_date` DATETIME NOT NULL,
@@ -71,6 +73,9 @@ public class User {
 	private String phoneNum;
 
 	@Enumerated(EnumType.STRING)
+	private UserStatus status;
+
+	@Enumerated(EnumType.STRING)
 	private UserAccess access;
 	
 	private LocalDateTime lastLoginAt;
@@ -88,4 +93,7 @@ public class User {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.REMOVE)
 	private List<Cart> cartList;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	private List<GoodsKey> goodsKeyList;
 }

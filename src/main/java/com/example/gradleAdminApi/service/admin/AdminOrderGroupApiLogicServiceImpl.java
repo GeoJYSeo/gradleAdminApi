@@ -3,16 +3,18 @@ package com.example.gradleAdminApi.service.admin;
 import com.example.gradleAdminApi.exception.NoSuchElementException;
 import com.example.gradleAdminApi.exception.UnauthenticatedException;
 import com.example.gradleAdminApi.model.Pagination;
+import com.example.gradleAdminApi.model.entity.GoodsKey;
 import com.example.gradleAdminApi.model.entity.OrderDetail;
 import com.example.gradleAdminApi.model.entity.OrderGroup;
 import com.example.gradleAdminApi.model.enumclass.OrderStatus;
 import com.example.gradleAdminApi.model.network.Header;
 import com.example.gradleAdminApi.model.network.request.OrderGroupApiRequest;
-import com.example.gradleAdminApi.model.network.response.GoodsApiResponse;
-import com.example.gradleAdminApi.model.network.response.GoodsImageApiResponse;
-import com.example.gradleAdminApi.model.network.response.OrderDetailApiResponse;
-import com.example.gradleAdminApi.model.network.response.OrderGroupApiResponse;
+import com.example.gradleAdminApi.model.network.response.*;
+import com.example.gradleAdminApi.repository.GoodsKeyRepository;
+import com.example.gradleAdminApi.repository.OrderDetailRepository;
 import com.example.gradleAdminApi.repository.OrderGroupRepository;
+import com.example.gradleAdminApi.service.GoodsApiLogicServiceImpl;
+import com.example.gradleAdminApi.service.GoodsKeyApiLogicServiceImpl;
 import com.example.gradleAdminApi.service.UserApiLogicServiceImpl;
 import com.example.gradleAdminApi.utils.DateFormat;
 import com.example.gradleAdminApi.utils.JwtUtil;
@@ -37,7 +39,10 @@ public class AdminOrderGroupApiLogicServiceImpl implements AdminOrderGroupApiLog
 	private JwtUtil jwtUtil;
 	
 	@Autowired
-	private OrderGroupRepository orderGroupRepository ;
+	private OrderGroupRepository orderGroupRepository;
+
+	@Autowired
+	private GoodsKeyRepository goodsKeyRepository;
 	
 	@Autowired
 	private AdminOrderDetailApiLogicServiceImpl adminOrderDetailApiLogicService;
@@ -50,6 +55,9 @@ public class AdminOrderGroupApiLogicServiceImpl implements AdminOrderGroupApiLog
 
 	@Autowired
 	private AdminGoodsImageApiLogicServiceImpl adminGoodsImageApiLogicService;
+
+	@Autowired
+	private GoodsKeyApiLogicServiceImpl goodsKeyApiLogicService;
 
 	@Autowired
 	private DateFormat dateFormat;
@@ -90,7 +98,9 @@ public class AdminOrderGroupApiLogicServiceImpl implements AdminOrderGroupApiLog
 		List<OrderDetail> orderDetailList = order.getOrderDetailList();
 		List<OrderDetailApiResponse> orderDetailResponseList = orderDetailList.stream()
 				.map(orderDetail -> {
-					OrderDetailApiResponse orderDetailApiResponse = adminOrderDetailApiLogicService.response(orderDetail);
+					List<GoodsKeyApiResponse> goodsKeyApiResponseList = orderDetail.getGoodsKeyList().stream()
+							.map(goodsKey -> goodsKeyApiLogicService.response(goodsKey, true)).collect(Collectors.toList());
+					OrderDetailApiResponse orderDetailApiResponse = adminOrderDetailApiLogicService.response(orderDetail, goodsKeyApiResponseList);
 
 					// Goods
 					GoodsApiResponse goodsApiResponse = adminGoodsApiLogicService.response(orderDetail.getGoods());
@@ -116,11 +126,14 @@ public class AdminOrderGroupApiLogicServiceImpl implements AdminOrderGroupApiLog
 		jwtUtil.getAccessAllPermission(authentication);
 		OrderGroupApiRequest orderGroupApiRequest = request.getData();
 
-		OrderStatus state = orderGroupApiRequest.getOrderStatus() == 0 ? OrderStatus.READY_TO_SHIP : OrderStatus.SHIPPED;
-		OrderGroup reOrder = orderGroupRepository.findById(orderGroupApiRequest.getId()).orElseThrow(NoSuchElementException::new)
-				.setOrderStatus(state);
+		OrderGroup reOrderGroup = orderGroupRepository.findById(orderGroupApiRequest.getId()).orElseThrow(NoSuchElementException::new)
+				.setOrderStatus(OrderStatus.CANCELLED);
 
-		return Header.OK(response(orderGroupRepository.save(reOrder)));
+		reOrderGroup.getOrderDetailList().forEach(orderDetail -> {
+			orderDetail.getGoodsKeyList().forEach(goodsKey -> goodsKeyRepository.save(goodsKey.setStatus(OrderStatus.CANCELLED)));
+		});
+
+		return Header.OK(response(orderGroupRepository.save(reOrderGroup)));
 	}
 
 	@Override

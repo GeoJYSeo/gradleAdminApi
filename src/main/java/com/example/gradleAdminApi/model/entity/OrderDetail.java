@@ -2,13 +2,9 @@ package com.example.gradleAdminApi.model.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -52,4 +48,7 @@ public class OrderDetail {
 	
 	@ManyToOne
 	private Goods goods;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "orderDetail")
+	private List<GoodsKey> goodsKeyList;
 }

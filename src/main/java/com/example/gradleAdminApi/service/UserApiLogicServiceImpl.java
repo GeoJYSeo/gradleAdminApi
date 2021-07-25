@@ -7,6 +7,7 @@ import com.example.gradleAdminApi.exception.NoSuchElementException;
 import com.example.gradleAdminApi.exception.UnauthenticatedException;
 import com.example.gradleAdminApi.model.enumclass.ErrorMessages;
 import com.example.gradleAdminApi.model.enumclass.UserAccess;
+import com.example.gradleAdminApi.model.enumclass.UserStatus;
 import com.example.gradleAdminApi.model.network.request.LoginApiRequest;
 import com.example.gradleAdminApi.utils.DateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 				.userAddr2(userApiRequest.getUserAddr2())
 				.userAddr3(userApiRequest.getUserAddr3())
 				.phoneNum(userApiRequest.getPhoneNum())
+				.status(UserStatus.ACTIVATED)
 				.access(UserAccess.MEMBER)
 				.upDate(LocalDateTime.now())
 				.build();
@@ -96,6 +98,7 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 		} else {
 			selectedUser.setUserName(userApiRequest.getUserName())
 					.setUserSurname(userApiRequest.getUserSurname())
+					.setBirthday(userApiRequest.getBirthday())
 					.setPostCode(userApiRequest.getPostCode())
 					.setUserAddr1(userApiRequest.getUserAddr1())
 					.setUserAddr2(userApiRequest.getUserAddr2())
@@ -115,7 +118,8 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 		log.info("delete user");
 
 		jwtUtil.getAuthPermission(id, authentication);
-		userRepository.delete(userRepository.findById(id).orElseThrow(NoSuchElementException::new));
+		User user = userRepository.findById(id).orElseThrow(NoSuchElementException::new);
+		userRepository.save(user.setStatus(UserStatus.DELETED_PENDING));
 
 		return Header.OK();
 	}
@@ -155,6 +159,7 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 				.userAddr2(user.getUserAddr2())
 				.userAddr3(user.getUserAddr3())
 				.phoneNum(user.getPhoneNum())
+				.status(user.getStatus().getTitle())
 				.access(user.getAccess().getId())
 				.strAccess(user.getAccess().getTitle())
 				.lastLoginAt(dateFormat.dateFormat(user.getLastLoginAt()))

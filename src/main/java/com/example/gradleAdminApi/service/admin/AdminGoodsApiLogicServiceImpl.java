@@ -2,7 +2,6 @@ package com.example.gradleAdminApi.service.admin;
 
 import com.example.gradleAdminApi.exception.GoogleStorageException;
 import com.example.gradleAdminApi.exception.NoSuchElementException;
-import com.example.gradleAdminApi.exception.UnauthenticatedException;
 import com.example.gradleAdminApi.model.Pagination;
 import com.example.gradleAdminApi.model.entity.Category;
 import com.example.gradleAdminApi.model.entity.Goods;
@@ -331,7 +330,7 @@ public class AdminGoodsApiLogicServiceImpl implements AdminGoodsApiLogicService 
 
 		jwtUtil.getAccessAllPermission(authentication);
 
-		// Delete Image files
+		// Delete Image files on GCPS
 		List<GoodsImage> goodsImageList = goodsRepository.findById(id).orElseThrow(NoSuchElementException::new).getGoodsImageList();
 		goodsImageList.forEach(image -> {
 			Boolean result = handlingGCPSImages.executeImageDelete(image.getImgName());

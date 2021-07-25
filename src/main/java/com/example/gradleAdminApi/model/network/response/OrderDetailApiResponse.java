@@ -1,7 +1,9 @@
 package com.example.gradleAdminApi.model.network.response;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import com.example.gradleAdminApi.model.entity.GoodsKey;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,8 @@ public class OrderDetailApiResponse {
 	private BigDecimal goodsTotalPrice;
 
 	private String regDate;
-	
+
 	private GoodsApiResponse goodsApiResponse;
+
+	private List<GoodsKeyApiResponse> goodsKeyApiResponseList;
 }

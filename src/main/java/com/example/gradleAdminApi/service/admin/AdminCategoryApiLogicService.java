@@ -3,9 +3,12 @@ package com.example.gradleAdminApi.service.admin;
 import com.example.gradleAdminApi.exception.NoSuchElementException;
 import com.example.gradleAdminApi.exception.UnauthenticatedException;
 import com.example.gradleAdminApi.model.entity.Category;
+import com.example.gradleAdminApi.model.entity.Goods;
 import com.example.gradleAdminApi.model.network.Header;
 import com.example.gradleAdminApi.model.network.request.CategoryApiRequest;
 import com.example.gradleAdminApi.model.network.response.CategoryApiResponse;
+import com.example.gradleAdminApi.repository.CategoryRepository;
+import com.example.gradleAdminApi.repository.GoodsRepository;
 import com.example.gradleAdminApi.service.AdminBaseService;
 import com.example.gradleAdminApi.utils.DateFormat;
 import com.example.gradleAdminApi.utils.JwtUtil;
@@ -30,6 +33,12 @@ public class AdminCategoryApiLogicService extends AdminBaseService<CategoryApiRe
 
 	@Autowired
 	private DateFormat dateFormat;
+
+	@Autowired
+	private GoodsRepository goodsRepository;
+
+	@Autowired
+	private CategoryRepository categoryRepository;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -99,6 +108,7 @@ public class AdminCategoryApiLogicService extends AdminBaseService<CategoryApiRe
 		log.info("delete category");
 
 		jwtUtil.getAccessAllPermission(authentication);
+		goodsRepository.findByCategoryId(id).forEach(this::accept);
 		adminBaseRepository.delete(adminBaseRepository.findById(id).orElseThrow(NoSuchElementException::new));
 		return Header.OK();
 	}
@@ -112,5 +122,9 @@ public class AdminCategoryApiLogicService extends AdminBaseService<CategoryApiRe
 				.cateCodeRef(category.getCateCodeRef())
 				.regDate(dateFormat.dateFormat(category.getRegDate()))
 				.build();
+	}
+
+	private void accept(Goods goods) {
+		goodsRepository.save(goods.setCategory(categoryRepository.findByCateCode("0").orElseThrow(NoSuchElementException::new)));
 	}
 }

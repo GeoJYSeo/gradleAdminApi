@@ -7,7 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import com.example.gradleAdminApi.model.entity.Goods;
 
+import java.util.List;
+
 @Repository
 public interface GoodsRepository extends JpaRepository<Goods, Long>{
     Page<Goods> findByGdsNameContaining(String keyword, Pageable pageable);
+
+    List<Goods> findByCategoryId(Long id);
 }

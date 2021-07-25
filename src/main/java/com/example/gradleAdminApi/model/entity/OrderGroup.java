@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"user", "orderDetailList"})
+@ToString(exclude = {"user"})
 @Entity
 @Accessors(chain = true)
 @EntityListeners(AuditingEntityListener.class)
@@ -32,7 +32,7 @@ public class OrderGroup {
 //	`total_price` DECIMAL(12,4) NOT NULL,
 //	`total_quantity` INT NOT NULL,
 //	`payment_type` VARCHAR(50) NOT NULL,
-//	`status` VARCHAR(20) NOT NULL,
+//	`order_status` VARCHAR(20) NOT NULL,
 //	`order_date` DATETIME NOT NULL,
 //	`user_id` BIGINT(20) NOT NULL,
 //	`cart_id` BIGINT(20) NOT NULL,

@@ -5,6 +5,7 @@ import com.example.gradleAdminApi.exception.UnauthenticatedException;
 import com.example.gradleAdminApi.model.entity.User;
 import com.example.gradleAdminApi.model.enumclass.ErrorMessages;
 import com.example.gradleAdminApi.model.enumclass.UserAccess;
+import com.example.gradleAdminApi.model.enumclass.UserStatus;
 import com.example.gradleAdminApi.model.network.Header;
 import com.example.gradleAdminApi.model.network.request.LoginApiRequest;
 import com.example.gradleAdminApi.model.network.request.UserApiRequest;
@@ -99,6 +100,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .userAddr2(userApiRequest.getUserAddr2())
                 .userAddr3(userApiRequest.getUserAddr3())
                 .phoneNum(userApiRequest.getPhoneNum())
+                .status(UserStatus.ACTIVATED)
                 .access(userAccess)
                 .lastLoginAt(LocalDateTime.now())
                 .upDate(LocalDateTime.now())
@@ -140,7 +142,8 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
         log.info("delete user");
 
         jwtUtil.getAccessAdminPermission(authentication);
-        userRepository.delete(userRepository.findById(id).orElseThrow(NoSuchElementException::new));
+        User user = userRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        userRepository.save(user.setStatus(UserStatus.DELETED));
         return Header.OK();
     }
 
@@ -148,8 +151,8 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
     public Header passwdCheck(Header<LoginApiRequest> request, Authentication authentication) throws Exception {
         log.info("password check");
 
-        User user = userRepository.findById(request.getData().getId()).orElseThrow(NoSuchElementException::new);
         Map<String, Object> claimsData = jwtUtil.getClaimsData(authentication);
+        User user = userRepository.findById(request.getData().getId()).orElseThrow(NoSuchElementException::new);
 
         if(user.getUserEmail().equals(claimsData.get("userEmail").toString()) || Objects.equals(9, claimsData.get("access"))) {
             if (passwordEncoder.matches(request.getData().getPasswd(), user.getPasswd())) {
@@ -175,6 +178,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .userAddr2(user.getUserAddr2())
                 .userAddr3(user.getUserAddr3())
                 .phoneNum(user.getPhoneNum())
+                .status(user.getStatus().getTitle())
                 .access(user.getAccess().getId())
                 .strAccess(user.getAccess().getTitle())
                 .lastLoginAt(dateFormat.dateFormat(user.getLastLoginAt()))

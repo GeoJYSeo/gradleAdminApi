@@ -9,14 +9,8 @@ import com.example.gradleAdminApi.model.enumclass.ErrorMessages;
 import com.example.gradleAdminApi.model.enumclass.OrderStatus;
 import com.example.gradleAdminApi.model.network.Header;
 import com.example.gradleAdminApi.model.network.request.OrderGroupApiRequest;
-import com.example.gradleAdminApi.model.network.response.GoodsApiResponse;
-import com.example.gradleAdminApi.model.network.response.GoodsImageApiResponse;
-import com.example.gradleAdminApi.model.network.response.OrderDetailApiResponse;
-import com.example.gradleAdminApi.model.network.response.OrderGroupApiResponse;
-import com.example.gradleAdminApi.repository.CartRepository;
-import com.example.gradleAdminApi.repository.GoodsRepository;
-import com.example.gradleAdminApi.repository.OrderDetailRepository;
-import com.example.gradleAdminApi.repository.UserRepository;
+import com.example.gradleAdminApi.model.network.response.*;
+import com.example.gradleAdminApi.repository.*;
 import com.example.gradleAdminApi.service.admin.AdminGoodsImageApiLogicServiceImpl;
 import com.example.gradleAdminApi.utils.DateFormat;
 import com.example.gradleAdminApi.utils.JwtUtil;
@@ -35,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,10 +50,13 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 	private OrderDetailRepository orderDetailRepository;
 
 	@Autowired
-	private UserApiLogicServiceImpl userApiLogicService;
+	private GoodsRepository goodsRepository;
 
 	@Autowired
-	private GoodsRepository goodsRepository;
+	private GoodsKeyRepository goodsKeyRepository;
+
+	@Autowired
+	private UserApiLogicServiceImpl userApiLogicService;
 
 	@Autowired
 	private OrderDetailApiLogicServiceImpl orderDetailApiLogicService;
@@ -68,6 +66,9 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 
 	@Autowired
 	private AdminGoodsImageApiLogicServiceImpl adminGoodsImageApiLogicService;
+
+	@Autowired
+	private GoodsKeyApiLogicServiceImpl goodsKeyApiLogicService;
 
 	@Autowired
 	private DateFormat dateFormat;
@@ -132,22 +133,26 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 				.totalPrice(orderGroupApiRequest.getTotalPrice())
 				.totalQuantity(orderGroupApiRequest.getTotalQuantity())
 				.paymentType(orderGroupApiRequest.getPaymentType())
-				.orderStatus(OrderStatus.READY_TO_SHIP)
+				.orderStatus(OrderStatus.CONFIRMED)
 				.user(user.get())
 				.build();
 
 		OrderGroup newOrder = allBaseRepository.save(order);
 
 		if(orderGroupApiRequest.getIsDirectOrder()) {
+			int goodsQuantity = orderGroupApiRequest.getTotalQuantity();
+
 			OrderDetail orderDetail = OrderDetail.builder()
-					.goodsQuantity(orderGroupApiRequest.getTotalQuantity())
+					.goodsQuantity(goodsQuantity)
 					.goodsTotalPrice(orderGroupApiRequest.getTotalPrice())
 					.goods(reqGoods.get())
 					.orderGroup(newOrder)
 					.build();
 			orderDetailRepository.save(orderDetail);
 
-			reqGoods.get().setGdsStock(reqGoods.get().getGdsStock() - orderDetail.getGoodsQuantity());
+			saveGoodsKeys(user.get(), reqGoods.get(), orderDetail, goodsQuantity);
+
+			reqGoods.get().setGdsStock(reqGoods.get().getGdsStock() - goodsQuantity);
 			goodsRepository.save(reqGoods.get());
 		} else {
 			// Insert Order Detail
@@ -156,13 +161,17 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 			cartGoodsList.forEach(cartGoods -> {
 				Goods goods = cartGoods.getGoods();
 
+				int goodsQuantity = cartGoods.getCartQuantity();
+
 				OrderDetail orderDetail = OrderDetail.builder()
-						.goodsQuantity(cartGoods.getCartQuantity())
+						.goodsQuantity(goodsQuantity)
 						.goodsTotalPrice(cartGoods.getGoods().getGdsPrice().multiply(new BigDecimal(cartGoods.getCartQuantity())))
 						.goods(goods)
 						.orderGroup(newOrder)
 						.build();
 				orderDetailRepository.save(orderDetail);
+
+				saveGoodsKeys(user.get(), goods, orderDetail, goodsQuantity);
 
 				goods.setGdsStock(goods.getGdsStock() - orderDetail.getGoodsQuantity());
 				goodsRepository.save(goods);
@@ -188,7 +197,9 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 		List<OrderDetail> orderDetailList = order.getOrderDetailList();
 		List<OrderDetailApiResponse> orderDetailApiResponseList = orderDetailList.stream()
 				.map(orderDetail -> {
-					OrderDetailApiResponse orderDetailApiResponse = orderDetailApiLogicService.response(orderDetail);
+					List<GoodsKeyApiResponse> goodsKeyApiResponseList = orderDetail.getGoodsKeyList().stream()
+							.map(goodsKey -> goodsKeyApiLogicService.response(goodsKey, false)).collect(Collectors.toList());
+					OrderDetailApiResponse orderDetailApiResponse = orderDetailApiLogicService.response(orderDetail, goodsKeyApiResponseList);
 
 					// Goods
 					GoodsApiResponse goodsApiResponse = goodsApiLogicService.response(orderDetail.getGoods());
@@ -217,7 +228,7 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 		Optional<OrderGroup> order = getOrder(orderGroupApiRequest.getId());
 
 		return order.isEmpty() ? Header.ERROR(ErrorMessages.NOT_FOUND.getTitle()) :
-				Header.OK(response(allBaseRepository.save(order.get().setOrderStatus(OrderStatus.CANCELLED))));
+				Header.OK(response(allBaseRepository.save(order.get().setOrderStatus(OrderStatus.CANCEL_PENDING))));
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -252,6 +263,22 @@ public class OrderGroupApiLogicService extends AllBaseService<OrderGroupApiReque
 
 	private Optional<OrderGroup> getOrder(Long id) {
 		return allBaseRepository.findById(id);
+	}
+
+	private void saveGoodsKeys(User user, Goods goods, OrderDetail orderDetail, int goodsQuantity) {
+		while (goodsQuantity > 0){
+			System.out.println(goodsQuantity);
+			GoodsKey goodsKey = GoodsKey.builder()
+					.regKey(UUID.randomUUID().toString())
+					.goodsName(goods.getGdsName())
+					.status(OrderStatus.SEALED)
+					.orderDetail(orderDetail)
+					.user(user)
+					.build();
+			System.out.println(goodsKey);
+			goodsKeyRepository.save(goodsKey);
+			goodsQuantity--;
+		}
 	}
 
 	public OrderGroupApiResponse response(OrderGroup orderGroup) {

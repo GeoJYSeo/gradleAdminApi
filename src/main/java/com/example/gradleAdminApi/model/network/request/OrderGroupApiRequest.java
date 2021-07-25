@@ -48,8 +48,7 @@ public class OrderGroupApiRequest {
 	@NotBlank
 	private String paymentType;
 
-	@NotNull
-	private int orderStatus;
+	private String orderStatus;
 
 	@NotNull
 	private Long userId;

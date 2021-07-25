@@ -59,7 +59,7 @@ public class HandlingGCPSImages {
             InputStream keyFile = ResourceUtils.getURL(gcp_credentials).openStream();
 
             Storage storage = StorageOptions.newBuilder().setProjectId(gcp_project_id).setCredentials(GoogleCredentials.fromStream(keyFile)).build().getService();
-
+            if("none.jpg".equals(imageName)) return true;
             return storage.delete(gcp_storage_bucket_name, imageName);
         } catch (IOException e) {
             log.error(e.getMessage());

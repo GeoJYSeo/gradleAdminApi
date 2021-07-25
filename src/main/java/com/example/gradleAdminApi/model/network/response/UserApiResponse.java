@@ -31,6 +31,8 @@ public class UserApiResponse {
 	
 	private String phoneNum;
 
+	private String status;
+
 	private int access;
 
 	private String strAccess;
