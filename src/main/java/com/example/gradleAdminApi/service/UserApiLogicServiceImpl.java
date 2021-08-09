@@ -91,20 +91,20 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 
 		User selectedUser = userRepository.findById(userApiRequest.getId()).orElseThrow(NoSuchElementException::new);
 
+		selectedUser.setUserName(userApiRequest.getUserName())
+				.setUserSurname(userApiRequest.getUserSurname())
+				.setBirthday(userApiRequest.getBirthday())
+				.setPostCode(userApiRequest.getPostCode())
+				.setUserAddr1(userApiRequest.getUserAddr1())
+				.setUserAddr2(userApiRequest.getUserAddr2())
+				.setUserAddr3(userApiRequest.getUserAddr3())
+				.setPhoneNum(userApiRequest.getPhoneNum())
+				.setUpDate(LocalDateTime.now());
+
 		if(userApiRequest.getPasswd() != null) {
 			String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
 
 			selectedUser.setPasswd(encodedPassword);
-		} else {
-			selectedUser.setUserName(userApiRequest.getUserName())
-					.setUserSurname(userApiRequest.getUserSurname())
-					.setBirthday(userApiRequest.getBirthday())
-					.setPostCode(userApiRequest.getPostCode())
-					.setUserAddr1(userApiRequest.getUserAddr1())
-					.setUserAddr2(userApiRequest.getUserAddr2())
-					.setUserAddr3(userApiRequest.getUserAddr3())
-					.setPhoneNum(userApiRequest.getPhoneNum())
-					.setUpDate(LocalDateTime.now());
 		}
 
 		return Header.OK(response(userRepository.save(selectedUser)));

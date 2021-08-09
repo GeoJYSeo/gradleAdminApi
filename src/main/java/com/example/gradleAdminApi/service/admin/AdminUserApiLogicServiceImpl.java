@@ -53,12 +53,15 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
 
         switch(searchKind) {
             case 0: searchedUsers = userRepository.findAll();
-            break;
+                break;
             case 1: searchedUsers = userRepository.findByUserEmailContaining(keyword);
-            break;
+                break;
             case 2: searchedUsers = userRepository.findByUserNameContaining(keyword);
-            break;
+                break;
             case 3: searchedUsers = userRepository.findByUserSurnameContaining(keyword);
+                break;
+            default:
+                throw new NoSuchElementException();
         }
 
         List<UserApiResponse> userApiResponse = searchedUsers.stream()
@@ -117,7 +120,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
     public Header<UserApiResponse> update(Header<UserApiRequest> request, Authentication authentication) throws Exception {
         log.info("put user modify");
 
-        jwtUtil.getAccessAdminPermission(authentication);
+        jwtUtil.getAccessAllPermission(authentication);
         UserApiRequest userApiRequest = request.getData();
 
         User selectedUser = userRepository.findById(userApiRequest.getId()).orElseThrow(NoSuchElementException::new)
@@ -130,6 +133,15 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .setUserAddr3(userApiRequest.getUserAddr3())
                 .setPhoneNum(userApiRequest.getPhoneNum())
                 .setAccess(getUserAccess(userApiRequest));
+
+        if(userApiRequest.getPasswd() != null) {
+            jwtUtil.getAuthPermission(request.getData().getId(), authentication);
+            jwtUtil.getAccessAdminPermission(authentication);
+            String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
+
+            selectedUser.setPasswd(encodedPassword);
+        }
+
         return Header.OK(response(userRepository.save(selectedUser)));
     }
 
@@ -164,7 +176,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
 
     private UserAccess getUserAccess(UserApiRequest userApiRequest) {
         return userApiRequest.getAccess() ==
-                UserAccess.ADMINISTRATOR.getId() ? UserAccess.ADMINISTRATOR : userApiRequest.getAccess() == UserAccess.MEMBER.getId() ? UserAccess.MANAGER :
+                UserAccess.ADMINISTRATOR.getId() ? UserAccess.ADMINISTRATOR : userApiRequest.getAccess() == UserAccess.MANAGER.getId() ? UserAccess.MANAGER :
                 UserAccess.MEMBER;
     }
 
