@@ -104,7 +104,6 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 					.setUserAddr2(userApiRequest.getUserAddr2())
 					.setUserAddr3(userApiRequest.getUserAddr3())
 					.setPhoneNum(userApiRequest.getPhoneNum())
-					.setAccess(UserAccess.ADMINISTRATOR)
 					.setUpDate(LocalDateTime.now());
 		}
 

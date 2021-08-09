@@ -85,10 +85,6 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
 
         String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
 
-        UserAccess userAccess = userApiRequest.getAccess() ==
-                UserAccess.ADMINISTRATOR.getId() ? UserAccess.ADMINISTRATOR : userApiRequest.getAccess() == UserAccess.MEMBER.getId() ? UserAccess.MANAGER :
-                UserAccess.MEMBER;
-
         User user = User.builder()
                 .userEmail(userApiRequest.getUserEmail())
                 .passwd(encodedPassword)
@@ -101,7 +97,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .userAddr3(userApiRequest.getUserAddr3())
                 .phoneNum(userApiRequest.getPhoneNum())
                 .status(UserStatus.ACTIVATED)
-                .access(userAccess)
+                .access(getUserAccess(userApiRequest))
                 .lastLoginAt(LocalDateTime.now())
                 .upDate(LocalDateTime.now())
                 .build();
@@ -121,9 +117,9 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
     public Header<UserApiResponse> update(Header<UserApiRequest> request, Authentication authentication) throws Exception {
         log.info("put user modify");
 
+        jwtUtil.getAccessAdminPermission(authentication);
         UserApiRequest userApiRequest = request.getData();
 
-        jwtUtil.getAccessAdminPermission(authentication);
         User selectedUser = userRepository.findById(userApiRequest.getId()).orElseThrow(NoSuchElementException::new)
                 .setUserName(userApiRequest.getUserName())
                 .setUserSurname(userApiRequest.getUserSurname())
@@ -132,7 +128,8 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .setUserAddr1(userApiRequest.getUserAddr1())
                 .setUserAddr2(userApiRequest.getUserAddr2())
                 .setUserAddr3(userApiRequest.getUserAddr3())
-                .setPhoneNum(userApiRequest.getPhoneNum());
+                .setPhoneNum(userApiRequest.getPhoneNum())
+                .setAccess(getUserAccess(userApiRequest));
         return Header.OK(response(userRepository.save(selectedUser)));
     }
 
@@ -163,6 +160,12 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
         } else {
             throw new UnauthenticatedException();
         }
+    }
+
+    private UserAccess getUserAccess(UserApiRequest userApiRequest) {
+        return userApiRequest.getAccess() ==
+                UserAccess.ADMINISTRATOR.getId() ? UserAccess.ADMINISTRATOR : userApiRequest.getAccess() == UserAccess.MEMBER.getId() ? UserAccess.MANAGER :
+                UserAccess.MEMBER;
     }
 
     public UserApiResponse response(User user) {
