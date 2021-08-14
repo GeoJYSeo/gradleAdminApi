@@ -134,7 +134,7 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .setPhoneNum(userApiRequest.getPhoneNum())
                 .setAccess(getUserAccess(userApiRequest));
 
-        if(userApiRequest.getPasswd() != null) {
+        if(passwordEncoder.matches(request.getData().getPasswd(), selectedUser.getPasswd()) && userApiRequest.getPasswd() != null) {
             jwtUtil.getAuthPermission(request.getData().getId(), authentication);
             jwtUtil.getAccessAdminPermission(authentication);
             String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
