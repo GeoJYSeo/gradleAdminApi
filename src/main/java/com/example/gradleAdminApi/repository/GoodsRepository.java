@@ -14,4 +14,6 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>{
     Page<Goods> findByGdsNameContaining(String keyword, Pageable pageable);
 
     List<Goods> findByCategoryId(Long id);
+
+    Page<Goods> findAllByCateCodeIn(List<String> targetCateCodeList, Pageable pageable);
 }

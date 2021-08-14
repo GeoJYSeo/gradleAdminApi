@@ -25,10 +25,10 @@ public class GoodsApiController {
 	
 	@GetMapping("")
 	public Header<List< GoodsApiResponse>> index(
-			@PageableDefault(sort = "id", direction = Sort.Direction.DESC, size=18) Pageable pageable, @RequestParam String keyword) throws Exception {
+			@PageableDefault(sort = "id", direction = Sort.Direction.DESC, size=18) Pageable pageable, @RequestParam String keyword, @RequestParam String categoryName) throws Exception {
 		log.info("get goods list");
-		
-		return goodsApiLogicService.index(pageable, keyword);
+
+		return goodsApiLogicService.index(pageable, keyword, categoryName);
 	}
 	
 	@GetMapping("/{id}")

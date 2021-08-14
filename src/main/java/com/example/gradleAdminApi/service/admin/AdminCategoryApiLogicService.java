@@ -108,7 +108,12 @@ public class AdminCategoryApiLogicService extends AdminBaseService<CategoryApiRe
 		log.info("delete category");
 
 		jwtUtil.getAccessAllPermission(authentication);
-		goodsRepository.findByCategoryId(id).forEach(this::accept);
+		goodsRepository.findByCategoryId(id).forEach(goods -> {
+			Category targetCate = adminBaseRepository.findById(1L).orElseThrow(NoSuchElementException::new);
+			goods.setCategory(targetCate);
+			goods.setCateCode(targetCate.getCateCode());
+			goodsRepository.save(goods);
+		});
 		adminBaseRepository.delete(adminBaseRepository.findById(id).orElseThrow(NoSuchElementException::new));
 		return Header.OK();
 	}

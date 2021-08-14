@@ -10,7 +10,7 @@ import com.example.gradleAdminApi.model.network.response.GoodsDetailApiResponse;
 
 public interface GoodsApiLogicService {
 	
-	Header<List<GoodsApiResponse>> index(Pageable pageable, String keyword) throws Exception;
+	Header<List<GoodsApiResponse>> index(Pageable pageable, String keyword, String category) throws Exception;
 	
 	Header<GoodsDetailApiResponse> read(Long id) throws Exception;
 }

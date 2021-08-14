@@ -1,10 +1,13 @@
 package com.example.gradleAdminApi.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.gradleAdminApi.exception.NoSuchElementException;
+import com.example.gradleAdminApi.model.entity.Category;
+import com.example.gradleAdminApi.repository.CategoryRepository;
 import com.example.gradleAdminApi.utils.DateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,6 +43,9 @@ public class GoodsApiLogicServiceImpl implements GoodsApiLogicService{
 	
 	@Autowired
 	private GoodsRepository goodsRepository;
+
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	@Autowired
 	private AdminCategoryApiLogicService adminCategoryApiLogicService;
@@ -52,10 +58,17 @@ public class GoodsApiLogicServiceImpl implements GoodsApiLogicService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public Header<List<GoodsApiResponse>> index(Pageable pageable, String keyword) throws Exception {
+	public Header<List<GoodsApiResponse>> index(Pageable pageable, String keyword, String categoryName) throws Exception {
 		log.info("get goods list");
 
-		Page<Goods> allGoods = goodsRepository.findByGdsNameContaining(keyword, pageable);
+		List<String> targetCateCodeList = new ArrayList<>();
+		Page<Goods> allGoods;
+		if(!categoryName.isBlank()) {
+			targetCateCodeList = categoryRepository.findByCateNameContaining(categoryName).stream().map(Category::getCateCode).collect(Collectors.toList());
+			allGoods = goodsRepository.findAllByCateCodeIn(targetCateCodeList, pageable);
+		} else {
+			allGoods = goodsRepository.findByGdsNameContaining(keyword, pageable);
+		}
 
 		List<GoodsApiResponse> goodsApiResponseList = allGoods.stream()
 				.map(goods -> {
