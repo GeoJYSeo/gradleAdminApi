@@ -123,6 +123,8 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
         jwtUtil.getAccessAllPermission(authentication);
         UserApiRequest userApiRequest = request.getData();
 
+        System.out.println(userApiRequest);
+
         User selectedUser = userRepository.findById(userApiRequest.getId()).orElseThrow(NoSuchElementException::new)
                 .setUserName(userApiRequest.getUserName())
                 .setUserSurname(userApiRequest.getUserSurname())
@@ -134,10 +136,13 @@ public class AdminUserApiLogicServiceImpl implements AdminUserApiLogicService  {
                 .setPhoneNum(userApiRequest.getPhoneNum())
                 .setAccess(getUserAccess(userApiRequest));
 
-        if(passwordEncoder.matches(request.getData().getPasswd(), selectedUser.getPasswd()) && userApiRequest.getPasswd() != null) {
-            jwtUtil.getAuthPermission(request.getData().getId(), authentication);
-            jwtUtil.getAccessAdminPermission(authentication);
-            String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
+        if(userApiRequest.getPasswd() != null && passwordEncoder.matches(request.getData().getPasswd(), selectedUser.getPasswd())) {
+            try {
+                jwtUtil.getAccessAdminPermission(authentication);
+            } catch (UnauthenticatedException e) {
+                jwtUtil.getAuthPermission(request.getData().getId(), authentication);
+            }
+            String encodedPassword = passwordEncoder.encode(userApiRequest.getNewPasswd());
 
             selectedUser.setPasswd(encodedPassword);
         }

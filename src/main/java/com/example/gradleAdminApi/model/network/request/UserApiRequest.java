@@ -24,6 +24,8 @@ public class UserApiRequest {
 	
 	@NotBlank
 	private String passwd;
+
+	private String newPasswd;
 	
 	@NotBlank
 	private String userName;

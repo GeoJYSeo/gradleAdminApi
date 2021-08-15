@@ -101,8 +101,10 @@ public class UserApiLogicServiceImpl implements UserApiLogicService {
 				.setPhoneNum(userApiRequest.getPhoneNum())
 				.setUpDate(LocalDateTime.now());
 
-		if(userApiRequest.getPasswd() != null) {
-			String encodedPassword = passwordEncoder.encode(userApiRequest.getPasswd());
+		if(userApiRequest.getPasswd() != null && passwordEncoder.matches(request.getData().getPasswd(), selectedUser.getPasswd())) {
+
+			jwtUtil.getAuthPermission(request.getData().getId(), authentication);
+			String encodedPassword = passwordEncoder.encode(userApiRequest.getNewPasswd());
 
 			selectedUser.setPasswd(encodedPassword);
 		}
