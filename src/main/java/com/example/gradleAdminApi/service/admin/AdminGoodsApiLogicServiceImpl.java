@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,7 +84,14 @@ public class AdminGoodsApiLogicServiceImpl implements AdminGoodsApiLogicService 
 
 
 					// Goods Images
-					List<GoodsImage> goodsImageList = goods.getGoodsImageList();
+					List<GoodsImage> goodsImageList = goods.getGoodsImageList().stream().filter(goodsImage -> goodsImage.getImgFlg() != 1).collect(Collectors.toList());
+					if (goodsImageList.isEmpty()) {
+						GoodsImage goodsImage = GoodsImage.builder()
+								.imgName("none.jpg")
+								.goods(goods)
+								.build();
+						goodsImageList.add(goodsImage);
+					}
 					List<GoodsImageApiResponse> GoodsImageApiResponseList = goodsImageList.stream()
 							.map(goodsImage -> adminGoodsImageApiLogicServiceImpl.response(goodsImage))
 							.collect(Collectors.toList());
@@ -192,7 +200,15 @@ public class AdminGoodsApiLogicServiceImpl implements AdminGoodsApiLogicService 
 		goodsApiResponse.setCategoryApiResponse(adminCategoryApiLogicService.response(goods.getCategory()));
 
 		// Goods Images
-		List<GoodsImageApiResponse> goodsImageApiResponseList = goodsImageRepository.findByGoodsIdAndImgFlgIs(id,0).stream()
+		List<GoodsImage> goodsImageList = goodsImageRepository.findByGoodsIdAndImgFlgIs(id,0);
+		if (goodsImageList.isEmpty()) {
+			GoodsImage goodsImage = GoodsImage.builder()
+					.imgName("none.jpg")
+					.goods(goods)
+					.build();
+			goodsImageList.add(goodsImage);
+		}
+		List<GoodsImageApiResponse> goodsImageApiResponseList = goodsImageList.stream()
 				.map(goodsImage -> adminGoodsImageApiLogicServiceImpl.response(goodsImage))
 				.collect(Collectors.toList());
 		goodsApiResponse.setGoodsImageApiResponseList(goodsImageApiResponseList);
@@ -266,15 +282,15 @@ public class AdminGoodsApiLogicServiceImpl implements AdminGoodsApiLogicService 
 
 		// Not exist Images in database
 		List<GoodsImage> goodsImageList = goodsImageRepository.findByGoodsIdAndImgFlgIs(request.getData().getId(),0);
-		if(goodsImageList.isEmpty()) {
-			GoodsImage noneGoodsImage = new GoodsImage();
-			noneGoodsImage.setGdsImg("imgUpload/none.png");
-			noneGoodsImage.setGdsThumbImg("imgUpload/none.png");
-			noneGoodsImage.setImgName("none");
-			noneGoodsImage.setOriName("none");
-			noneGoodsImage.setGoods(reGoods);
-			goodsImageRepository.save(noneGoodsImage);
-		}
+//		if(goodsImageList.isEmpty()) {
+//			GoodsImage noneGoodsImage = new GoodsImage();
+//			noneGoodsImage.setGdsImg("imgUpload/none.png");
+//			noneGoodsImage.setGdsThumbImg("imgUpload/none.png");
+//			noneGoodsImage.setImgName("none");
+//			noneGoodsImage.setOriName("none");
+//			noneGoodsImage.setGoods(reGoods);
+//			goodsImageRepository.save(noneGoodsImage);
+//		}
 
 		// Update Images
 //		GoodsImage reGoodsImage = new GoodsImage();
